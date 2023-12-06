@@ -2,7 +2,7 @@ import { findUserByEmail, findUserById } from '../user/user.service';
 import { LoginReqDto } from './dtos/login.dto';
 import { HttpException } from '../../utils/http-exception';
 import bcrypt from 'bcrypt';
-import { generateAccessToken } from '../../utils/functions/auth-helpers';
+import { generateAccessToken } from '../../utils/functions/auth.helpers';
 import { UserInfo } from '../../utils/interfaces/auth.interface';
 import { UserRole } from '@prisma/client';
 import { CUSTOM_ERROR_MESSAGES } from '../../utils/constants';

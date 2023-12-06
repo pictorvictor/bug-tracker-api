@@ -1,5 +1,5 @@
 import { IsEmail, IsString, Matches, MinLength } from 'class-validator';
-import { IsIdentifierAvailable } from '../../../utils/decorators/validation-helpers';
+import { IsIdentifierAvailable } from '../../../utils/decorators/validation.helpers';
 
 export class CreateTeamMemberReqDto {
   @IsEmail()

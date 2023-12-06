@@ -2,7 +2,7 @@ import { UserRole } from '@prisma/client';
 import { prisma } from '../../prisma';
 import { SUCCESS_MESSAGE } from '../../utils/constants';
 import { CreateTeamMemberReqDto } from './dtos/create-team-member.dto';
-import { hashPassword } from '../../utils/functions/auth-helpers';
+import { hashPassword } from '../../utils/functions/auth.helpers';
 
 const findUserByEmail = async (email: string) => {
   return await prisma.user.findFirst({

@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsOptional, IsString, Validate } from 'class-validator';
-import { OnlyOneOf } from '../../../utils/decorators/validation-helpers';
+import { OnlyOneOf } from '../../../utils/decorators/validation.helpers';
 
 export class DropdownDataConditionsDto {
   @Validate(OnlyOneOf, ['category', 'sizeGroupId'])

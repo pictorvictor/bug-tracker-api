@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import bcrypt from 'bcrypt';
-import { JWT_ACCESS_SECRET, NODE_ENV } from '../../utils/env';
+import { JWT_ACCESS_SECRET, NODE_ENV } from '../env';
 import jwt from 'jsonwebtoken';
 import { UserRole } from '@prisma/client';
 import { UserInfo } from '../interfaces/auth.interface';

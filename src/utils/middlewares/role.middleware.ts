@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import { CUSTOM_ERROR_MESSAGES } from '../constants';
 import { HttpException } from '../http-exception';
-import { getTokenFromRequest } from '../functions/auth-helpers';
+import { getTokenFromRequest } from '../functions/auth.helpers';
 import jwt from 'jsonwebtoken';
 import { JWT_ACCESS_SECRET } from '../env';
 import {

@@ -4,7 +4,7 @@ import { Routes } from '../../utils/interfaces/routes.interface';
 import { AuthController } from './auth.controller';
 import validationMiddleware from '../../utils/middlewares/validation.middleware';
 import { LoginReqDto } from './dtos/login.dto';
-import { authMiddleware } from '../../utils/middlewares/auth-middleware';
+import { authMiddleware } from '../../utils/middlewares/auth.middleware';
 import {
   RequestWithUser,
   UserInfo,

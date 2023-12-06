@@ -4,7 +4,7 @@ import { Routes } from '../../utils/interfaces/routes.interface';
 import { UserController } from './user.controller';
 import { UserRole } from '@prisma/client';
 import validationMiddleware from '../../utils/middlewares/validation.middleware';
-import { roleMiddleware } from '../../utils/middlewares/role-middleware';
+import { roleMiddleware } from '../../utils/middlewares/role.middleware';
 import { CreateTeamMemberReqDto } from './dtos/create-team-member.dto';
 
 class UserRouter implements Routes {
