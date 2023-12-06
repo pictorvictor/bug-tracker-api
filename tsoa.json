@@ -1,0 +1,16 @@
+{
+  "entryFile": "src/server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/**/*controller.ts"],
+  "spec": {
+    "outputDirectory": "src",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
