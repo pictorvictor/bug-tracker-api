@@ -1,9 +1,15 @@
 import AuthRouter from './api/auth/auth.router';
+import ProjectRouter from './api/project/project.router';
 import TestingRouter from './api/testing/testing.router';
 import UserRouter from './api/user/user.router';
 import { App } from './app';
 
-const routes = [new TestingRouter(), new UserRouter(), new AuthRouter()];
+const routes = [
+  new TestingRouter(),
+  new AuthRouter(),
+  new ProjectRouter(),
+  new UserRouter(),
+];
 
 const app = new App(routes);
 

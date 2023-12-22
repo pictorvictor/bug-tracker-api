@@ -14,10 +14,39 @@ model User {
   createdAt                   DateTime        @default(now()) @map("created_at")
   updatedAt                   DateTime        @updatedAt @map("updated_at")
   role                        UserRole
+  teamMemberInfo              TeamMemberInfo?
+  testerInfo                  TesterInfo?
 }
 
 enum UserRole {
   TST
   MP
   ADMIN
+}
+
+model TeamMemberInfo {
+  id                          String          @id @unique @default(uuid())
+  projects                    Project[]       @relation(name: "projects")
+  memberProjects              Project[]       @relation(name: "project_team")
+  user                        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId                      String?         @unique @map("user_id")
+}
+
+model TesterInfo {
+  id                          String          @id @unique @default(uuid())
+  projects                    Project[]
+  user                        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId                      String?         @unique @map("user_id")
+}
+
+model Project {
+  id                          String          @id @unique @default(uuid())
+  projectName                 String          @map("project_name")
+  repositoryName              String          @map("repository_name")
+  projectTeam                 TeamMemberInfo[] @relation(name: "project_team")
+  testerTeam                  TesterInfo[]
+  owner                       TeamMemberInfo  @relation(fields: [ownerId], references: [id], name: "projects")
+  ownerId                     String
+  createdAt                   DateTime        @default(now()) @map("created_at")
+  updatedAt                   DateTime        @updatedAt @map("updated_at")
 }

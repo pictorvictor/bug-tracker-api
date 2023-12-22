@@ -10,8 +10,9 @@ import {
 } from 'tsoa';
 import { ROUTES } from '../../utils/constants';
 import { LoginReqDto } from './dtos/login.dto';
-import { loginUser, getMyProfile } from './auth.service';
+import { loginUser, getMyProfile, register } from './auth.service';
 import { UserInfo } from '../../utils/interfaces/auth.interface';
+import { RegisterReqDto } from './dtos/register.dto';
 
 @Route('api')
 @Tags('Auth')
@@ -25,5 +26,11 @@ export class AuthController extends Controller {
   @Get(ROUTES.auth.myProfile)
   getMyProfile(@Request() reqUser: UserInfo) {
     return getMyProfile(reqUser);
+  }
+
+  @Security('token')
+  @Post(ROUTES.auth.register)
+  register(@Body() body: RegisterReqDto) {
+    return register(body);
   }
 }

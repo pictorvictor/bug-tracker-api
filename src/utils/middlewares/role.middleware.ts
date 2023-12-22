@@ -25,7 +25,7 @@ export const roleMiddleware =
       return next(new HttpException(CUSTOM_ERROR_MESSAGES.FORBIDDEN, 403));
     }
 
-    if (payload?.user?.role !== role)
+    if (payload?.user?.role !== role && payload?.user?.role !== UserRole.ADMIN)
       return next(new HttpException(CUSTOM_ERROR_MESSAGES.FORBIDDEN, 403));
 
     const { user } = payload;

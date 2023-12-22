@@ -9,6 +9,7 @@ import {
   RequestWithUser,
   UserInfo,
 } from '../../utils/interfaces/auth.interface';
+import { RegisterReqDto } from './dtos/register.dto';
 
 class AuthRouter implements Routes {
   public router = Router();
@@ -25,6 +26,11 @@ class AuthRouter implements Routes {
       this.login,
     );
     this.router.get(ROUTES.auth.myProfile, authMiddleware, this.getMyProfile);
+    this.router.post(
+      ROUTES.auth.register,
+      validationMiddleware(RegisterReqDto, 'body'),
+      this.register,
+    );
   };
 
   private login = async (req: Request, res: Response, next: NextFunction) => {
@@ -45,6 +51,20 @@ class AuthRouter implements Routes {
     try {
       const { user } = req;
       const response = await this.authController.getMyProfile(user as UserInfo);
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  private register = async (
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { body } = req;
+      const response = await this.authController.register(body);
       res.status(200).json(response);
     } catch (error) {
       next(error);

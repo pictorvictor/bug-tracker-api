@@ -1,14 +1,14 @@
-import { Body, Controller, Post, Route, Security, Tags } from 'tsoa';
+import { Controller, Get, Route, Security, Tags, Request, Query } from 'tsoa';
+import { UserRole } from '@prisma/client';
 import { ROUTES } from '../../utils/constants';
-import { createTeamMember } from './user.service';
-import { CreateTeamMemberReqDto } from './dtos/create-team-member.dto';
+import { getAllUsers } from './user.service';
 
 @Route('api')
 @Tags('User')
 export class UserController extends Controller {
-  @Post(ROUTES.user.createTeamMember)
+  @Get(ROUTES.user.getAllUsers)
   @Security('token')
-  createTeamMember(@Body() body: CreateTeamMemberReqDto) {
-    return createTeamMember(body);
+  getAllUsers(@Query() role: UserRole) {
+    return getAllUsers(role);
   }
 }

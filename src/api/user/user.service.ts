@@ -1,8 +1,5 @@
 import { UserRole } from '@prisma/client';
 import { prisma } from '../../prisma';
-import { SUCCESS_MESSAGE } from '../../utils/constants';
-import { CreateTeamMemberReqDto } from './dtos/create-team-member.dto';
-import { hashPassword } from '../../utils/functions/auth.helpers';
 
 const findUserByEmail = async (email: string) => {
   return await prisma.user.findFirst({
@@ -20,22 +17,44 @@ const findUserById = async (id: string) => {
   });
 };
 
-const createTeamMember = async (
-  createTeamMemberReqDto: CreateTeamMemberReqDto,
-) => {
-  const { email, password } = createTeamMemberReqDto;
-
-  const hashedPassword = await hashPassword(password);
-
-  await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      role: UserRole.MP,
+const getAllUsers = async (role: UserRole) => {
+  const users = await prisma.user.findMany({
+    where: {
+      role: {
+        equals: role,
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      teamMemberInfo:
+        role == 'MP'
+          ? {
+              select: {
+                projects: true,
+              },
+            }
+          : false,
+      testerInfo:
+        role == 'TST'
+          ? {
+              select: {
+                projects: true,
+              },
+            }
+          : false,
     },
   });
 
-  return { message: SUCCESS_MESSAGE };
+  return users.map((user: any) => {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      projects: user.teamMemberInfo?.projects || user.testerInfo?.projects,
+    };
+  });
 };
 
-export { findUserByEmail, findUserById, createTeamMember };
+export { findUserByEmail, findUserById, getAllUsers };
