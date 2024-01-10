@@ -33,7 +33,7 @@ const validationMiddleware = (
   value: 'body' | 'query' | 'params' = 'body',
   skipMissingProperties = false,
   whitelist = true,
-  forbidNonWhitelisted = true,
+  forbidNonWhitelisted = false,
 ): RequestHandler => {
   return (req: Request, _res: Response, next: NextFunction) => {
     validate(plainToInstance(type, req[value]), {
@@ -44,7 +44,6 @@ const validationMiddleware = (
       if (errors.length > 0) {
         const errorMessages = processErrors(errors);
         const message = [...errorMessages].join(', ');
-
         next(new HttpException(message, 400));
       } else {
         next();

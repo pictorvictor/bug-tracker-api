@@ -6,6 +6,7 @@ import { UserRole } from '@prisma/client';
 import validationMiddleware from '../../utils/middlewares/validation.middleware';
 import { roleMiddleware } from '../../utils/middlewares/role.middleware';
 import { UserRoleDto } from './dtos/user.dto';
+import { authMiddleware } from '../../utils/middlewares/auth.middleware';
 
 class UserRouter implements Routes {
   public router = Router();
@@ -16,12 +17,29 @@ class UserRouter implements Routes {
   }
 
   private initializeRoutes = () => {
+    this.router.get(ROUTES.user.getAllUsers, authMiddleware, this.getAllUsers);
     this.router.get(
-      ROUTES.user.getAllUsers,
-      roleMiddleware(UserRole.MP),
-      validationMiddleware(UserRoleDto, 'query'),
-      this.getAllUsers,
+      ROUTES.user.getUsersByRole,
+      authMiddleware,
+      validationMiddleware(UserRoleDto, 'params'),
+      this.getUsersByRole,
     );
+  };
+
+  private getUsersByRole = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { role } = req.params;
+      const response = await this.userController.getUsersByRole(
+        role as UserRole,
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
   };
 
   private getAllUsers = async (
@@ -30,8 +48,7 @@ class UserRouter implements Routes {
     next: NextFunction,
   ) => {
     try {
-      const { role } = req.query;
-      const response = await this.userController.getAllUsers(role as UserRole);
+      const response = await this.userController.getAllUsers();
       res.status(200).json(response);
     } catch (error) {
       next(error);

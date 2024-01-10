@@ -28,15 +28,15 @@ model TeamMemberInfo {
   id                          String          @id @unique @default(uuid())
   projects                    Project[]       @relation(name: "projects")
   memberProjects              Project[]       @relation(name: "project_team")
-  user                        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId                      String?         @unique @map("user_id")
+  user                        User?           @relation(fields: [id], references: [id], onDelete: SetNull)
+  bugs                        Bug[]           @relation(name: "member_bugs")
 }
 
 model TesterInfo {
   id                          String          @id @unique @default(uuid())
   projects                    Project[]
-  user                        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId                      String?         @unique @map("user_id")
+  user                        User?           @relation(fields: [id], references: [id], onDelete: SetNull)
+  reportedBugs                Bug[]           @relation(name:"reported_bugs")
 }
 
 model Project {
@@ -49,4 +49,47 @@ model Project {
   ownerId                     String
   createdAt                   DateTime        @default(now()) @map("created_at")
   updatedAt                   DateTime        @updatedAt @map("updated_at")
+  bugs                        Bug[]           @relation(name: "project_bugs")
+}
+
+model Bug {
+  id                          String          @id @unique @default(uuid())
+  title                       String
+  priority                    PriorityEnum
+  details                     String?
+  issueLink                   String?
+  reporter                    TesterInfo      @relation(fields: reporterId, references:[id], name:"reported_bugs")
+  assignedTo                  TeamMemberInfo? @relation(fields: assignedToId, references:[id], name: "member_bugs")
+  testSteps                   String?         @map("test_steps")
+  solution                    String?
+  resolution                  ResolutionEnum?
+  project                     Project         @relation(fields: projectId, references:[id], name: "project_bugs")
+  reporterId                  String
+  assignedToId                String?
+  projectId                   String
+  bugStatus                   BugStatus       @map("bug_status")
+}
+
+enum PriorityEnum {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ResolutionEnum {
+  Done
+  Resolved
+  Unresolved
+  CannotReproduce
+  Incomplete
+  Duplicate
+}
+
+enum BugStatus {
+  ToDo
+  InProgress
+  Verification
+  VerificationDone
+  Done
+  ClosedIssue
 }

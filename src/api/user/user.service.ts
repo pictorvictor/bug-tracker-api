@@ -1,5 +1,6 @@
 import { UserRole } from '@prisma/client';
 import { prisma } from '../../prisma';
+import { AvailableForRegisterUserRoles } from '../../utils/constants';
 
 const findUserByEmail = async (email: string) => {
   return await prisma.user.findFirst({
@@ -17,36 +18,40 @@ const findUserById = async (id: string) => {
   });
 };
 
-const getAllUsers = async (role: UserRole) => {
+const getAllUsers = async () => {
+  const roles = Object.values(AvailableForRegisterUserRoles);
+  const users: any[] = [];
+
+  for (const role of roles) {
+    users.push(await getUsersByRole(role as UserRole));
+  }
+
+  return users.flat();
+};
+
+const getUsersByRole = async (role: UserRole) => {
   const users = await prisma.user.findMany({
     where: {
-      role: {
-        equals: role,
-      },
+      role,
     },
     select: {
       id: true,
       email: true,
       role: true,
-      teamMemberInfo:
-        role == 'MP'
-          ? {
-              select: {
-                projects: true,
-              },
-            }
-          : false,
-      testerInfo:
-        role == 'TST'
-          ? {
-              select: {
-                projects: true,
-              },
-            }
-          : false,
+      teamMemberInfo: {
+        select: {
+          projects: true,
+          id: true,
+        },
+      },
+      testerInfo: {
+        select: {
+          projects: true,
+          id: true,
+        },
+      },
     },
   });
-
   return users.map((user: any) => {
     return {
       id: user.id,
@@ -57,4 +62,4 @@ const getAllUsers = async (role: UserRole) => {
   });
 };
 
-export { findUserByEmail, findUserById, getAllUsers };
+export { findUserByEmail, findUserById, getAllUsers, getUsersByRole };

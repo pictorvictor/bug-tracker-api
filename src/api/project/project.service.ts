@@ -47,18 +47,17 @@ const createProject = async (reqUser: UserInfo, body: CreateProjectReqDto) => {
       repositoryName,
       owner: {
         connect: {
-          id: requestUser?.teamMemberInfo?.id,
+          id: requestUser?.id,
         },
       },
       projectTeam: {
         connect: [
-          ...(memberUsers?.map((user) => ({ id: user?.teamMemberInfo?.id })) ??
-            []),
-          { id: requestUser?.teamMemberInfo?.id },
+          ...(memberUsers?.map((user) => ({ id: user?.id })) ?? []),
+          { id: requestUser?.id },
         ],
       },
       testerTeam: {
-        connect: testerUsers?.map((user) => ({ id: user?.testerInfo?.id })),
+        connect: testerUsers?.map((user) => ({ id: user?.id })),
       },
     },
   });
@@ -66,4 +65,81 @@ const createProject = async (reqUser: UserInfo, body: CreateProjectReqDto) => {
   return { message: SUCCESS_MESSAGE };
 };
 
-export { createProject };
+const getAllProjects = async (reqUser: UserInfo) => {
+  const { id: userId, role } = reqUser;
+  const requestUser = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    include: {
+      teamMemberInfo: true,
+      testerInfo: true,
+    },
+  });
+  if (role === 'TST') {
+    const projects = await prisma.project.findMany({
+      include: {
+        owner: true,
+        bugs: true,
+        testerTeam: true,
+      },
+    });
+
+    const filteredProjects = projects.map((project) => {
+      const testerTeam = project?.testerTeam?.map((tester) => tester?.id);
+      if (testerTeam?.includes(requestUser?.testerInfo?.id as string)) {
+        return project;
+      } else {
+        return {
+          ...project,
+          bugs: undefined,
+        };
+      }
+    });
+
+    return filteredProjects;
+  }
+  const projects = await prisma.project.findMany({
+    where: {
+      OR: [
+        {
+          ownerId: requestUser?.teamMemberInfo?.id,
+        },
+        {
+          projectTeam: {
+            some: {
+              id: requestUser?.teamMemberInfo?.id,
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      owner: true,
+      testerTeam: true,
+      projectTeam: true,
+      bugs: true,
+    },
+  });
+  return projects;
+};
+
+const enrollInProject = async (reqUser: UserInfo, projectId: string) => {
+  const { id } = reqUser;
+  await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      testerTeam: {
+        connect: {
+          id,
+        },
+      },
+    },
+  });
+
+  return { message: SUCCESS_MESSAGE };
+};
+
+export { createProject, getAllProjects, enrollInProject };

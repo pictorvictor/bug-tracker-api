@@ -30,17 +30,29 @@ const loginUser = async (loginDto: LoginReqDto) => {
 };
 
 const getMyProfile = async (reqUser: UserInfo) => {
-  const teamMemberUser = await findUserById(reqUser.id);
+  const user = await findUserById(reqUser.id);
 
   const repos: any = await prisma.project.findMany({
     where: {
-      projectTeam: {
-        some: {
-          userId: reqUser.id,
+      OR: [
+        {
+          projectTeam: {
+            some: {
+              id: reqUser.id,
+            },
+          },
         },
-      },
+        {
+          testerTeam: {
+            some: {
+              id: reqUser.id,
+            },
+          },
+        },
+      ],
     },
     select: {
+      id: true,
       projectTeam: {
         select: {
           user: {
@@ -88,9 +100,9 @@ const getMyProfile = async (reqUser: UserInfo) => {
   });
 
   return {
-    id: teamMemberUser?.id,
-    role: teamMemberUser?.role,
-    email: teamMemberUser?.email,
+    id: user?.id,
+    role: user?.role,
+    email: user?.email,
     projects,
   };
 };
@@ -98,7 +110,6 @@ const getMyProfile = async (reqUser: UserInfo) => {
 const register = async (registerReqDto: RegisterReqDto) => {
   const { identifier, role, password } = registerReqDto;
   const foundUser = await findUserByEmail(identifier);
-
   if (foundUser)
     throw new HttpException(CUSTOM_ERROR_MESSAGES.USER_ALREADY_TAKEN, 400);
 
