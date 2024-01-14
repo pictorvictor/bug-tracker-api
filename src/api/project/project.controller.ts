@@ -8,6 +8,7 @@ import {
   Tags,
   Get,
   Path,
+  Patch,
 } from 'tsoa';
 import { ROUTES } from '../../utils/constants';
 import { CreateProjectReqDto } from './dtos/create-project.dto';
@@ -16,7 +17,9 @@ import {
   createProject,
   getAllProjects,
   enrollInProject,
+  updateProject
 } from './project.service';
+import { UpdateProjectDto } from './dtos/update-project.dto';
 
 @Route('api')
 @Tags('Project')
@@ -40,5 +43,11 @@ export class ProjectController extends Controller {
   @Security('token')
   enrollInProject(@Request() reqUser: UserInfo, @Path() projectId: string) {
     return enrollInProject(reqUser, projectId);
+  }
+
+  @Patch(ROUTES.project.project)
+  @Security('token')
+  updateProject(@Request() reqUser: UserInfo, @Path() projectId: string, @Body() body: UpdateProjectDto) {
+    return updateProject(reqUser, projectId, body);
   }
 }

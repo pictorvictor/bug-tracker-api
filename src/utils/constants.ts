@@ -12,6 +12,7 @@ export const ROUTES = {
   project: {
     projects: '/projects',
     enrollInProject: '/projects/enroll/:projectId',
+    project: '/projects/:projectId',
   },
   user: {
     getUsersByRole: '/users/:role',

@@ -2,6 +2,7 @@ import { prisma } from '../../prisma';
 import { UserInfo } from '../../utils/interfaces/auth.interface';
 import { CreateProjectReqDto } from './dtos/create-project.dto';
 import { CUSTOM_ERROR_MESSAGES, SUCCESS_MESSAGE } from '../../utils/constants';
+import { HttpException } from '../../utils/http-exception';
 
 const createProject = async (reqUser: UserInfo, body: CreateProjectReqDto) => {
   const { repositoryName, projectName, projectMembers, testers } = body;
@@ -76,52 +77,54 @@ const getAllProjects = async (reqUser: UserInfo) => {
       testerInfo: true,
     },
   });
-  if (role === 'TST') {
+
     const projects = await prisma.project.findMany({
       include: {
-        owner: true,
-        bugs: true,
-        testerTeam: true,
+        owner: {include: {user: {select: {email: true}}}},
+        bugs: {
+          include: {
+            assignedTo: {
+              include: {
+                user: {
+                  select: {
+                    email: true,
+                  }
+                },
+              },
+            },
+            reporter: {
+              include: {
+                user: {
+                  select: {
+                    email: true,
+                  }
+                },
+              },
+            }
+          }
+        },
+        testerTeam: {
+          include: {
+            user: {
+              select: {
+                email: true,
+              }
+            },
+          }
+        },
+        projectTeam: {
+          include: {
+            user: {
+              select: {
+                email: true,
+              }
+            }
+          }
+        },
       },
     });
 
-    const filteredProjects = projects.map((project) => {
-      const testerTeam = project?.testerTeam?.map((tester) => tester?.id);
-      if (testerTeam?.includes(requestUser?.testerInfo?.id as string)) {
-        return project;
-      } else {
-        return {
-          ...project,
-          bugs: undefined,
-        };
-      }
-    });
-
-    return filteredProjects;
-  }
-  const projects = await prisma.project.findMany({
-    where: {
-      OR: [
-        {
-          ownerId: requestUser?.teamMemberInfo?.id,
-        },
-        {
-          projectTeam: {
-            some: {
-              id: requestUser?.teamMemberInfo?.id,
-            },
-          },
-        },
-      ],
-    },
-    include: {
-      owner: true,
-      testerTeam: true,
-      projectTeam: true,
-      bugs: true,
-    },
-  });
-  return projects;
+    return projects;
 };
 
 const enrollInProject = async (reqUser: UserInfo, projectId: string) => {
@@ -142,4 +145,34 @@ const enrollInProject = async (reqUser: UserInfo, projectId: string) => {
   return { message: SUCCESS_MESSAGE };
 };
 
-export { createProject, getAllProjects, enrollInProject };
+const updateProject = async (reqUser: UserInfo, projectId: string, body: any) => {
+  const { id } = reqUser;
+  const { projectName, repositoryName } = body;
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+    },
+    include: {
+      projectTeam: true,
+      testerTeam: true,
+    },
+  });
+
+  if(!project?.projectTeam.some((teamMember) => teamMember?.id === id))
+    throw new HttpException(CUSTOM_ERROR_MESSAGES.FORBIDDEN, 403);
+
+  await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      projectName,
+      repositoryName,
+    },
+  });
+
+  return { message: SUCCESS_MESSAGE };
+}
+
+export { createProject, getAllProjects, enrollInProject, updateProject };

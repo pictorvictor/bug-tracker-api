@@ -11,6 +11,7 @@ import { roleMiddleware } from '../../utils/middlewares/role.middleware';
 import validationMiddleware from '../../utils/middlewares/validation.middleware';
 import { ProjectIdDto } from '../project/dtos/project-id.dto';
 import { BugIdDto } from './dtos/bug-id.dto';
+import { UpdateBugDto } from './dtos/update-bug.dto';
 
 class BugRouter implements Routes {
   public router = Router();
@@ -33,18 +34,12 @@ class BugRouter implements Routes {
       validationMiddleware(ProjectIdDto, 'params'),
       this.createBug,
     );
-    // TO DO: update bug
-    // this.router.patch(
-    //   ROUTES.bug.bug,
-    //   authMiddleware,
-    //   validationMiddleware(ProjectIdDto, 'params'),
-    //   this.updateBug,
-    // );
     this.router.patch(
-      ROUTES.bug.assignBugToMe,
-      roleMiddleware('MP'),
+      ROUTES.bug.bug,
+      authMiddleware,
       validationMiddleware(BugIdDto, 'params'),
-      this.assignBugToMe,
+      validationMiddleware(UpdateBugDto, 'body'),
+      this.updateBug,
     );
   };
 
@@ -83,7 +78,7 @@ class BugRouter implements Routes {
     }
   };
 
-  private assignBugToMe = async (
+  private updateBug = async (
     req: RequestWithUser,
     res: Response,
     next: NextFunction,
@@ -91,7 +86,8 @@ class BugRouter implements Routes {
     try {
       const user = req.user as UserInfo;
       const { bugId } = req.params;
-      const response = await this.bugController.assignBugToMe(user, bugId);
+      const body = req.body;
+      const response = await this.bugController.updateBug(user, bugId, body);
       res.status(200).json(response);
     } catch (error) {
       next(error);

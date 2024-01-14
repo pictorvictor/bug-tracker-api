@@ -84,6 +84,61 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BugStatus": {
+				"type": "string",
+				"enum": [
+					"Done",
+					"ToDo",
+					"InProgress",
+					"Verification",
+					"VerificationDone",
+					"ClosedIssue"
+				]
+			},
+			"ResolutionEnum": {
+				"type": "string",
+				"enum": [
+					"Done",
+					"Resolved",
+					"Unresolved",
+					"CannotReproduce",
+					"Incomplete",
+					"Duplicate"
+				]
+			},
+			"UpdateBugDto": {
+				"properties": {
+					"status": {
+						"$ref": "#/components/schemas/BugStatus"
+					},
+					"priority": {
+						"$ref": "#/components/schemas/PriorityEnum"
+					},
+					"title": {
+						"type": "string"
+					},
+					"details": {
+						"type": "string"
+					},
+					"testSteps": {
+						"type": "string"
+					},
+					"solution": {
+						"type": "string"
+					},
+					"resolution": {
+						"$ref": "#/components/schemas/ResolutionEnum"
+					},
+					"issueLink": {
+						"type": "string"
+					},
+					"assignedToId": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CreateProjectReqDto": {
 				"properties": {
 					"repositoryName": {
@@ -109,6 +164,18 @@
 					"repositoryName",
 					"projectName"
 				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateProjectDto": {
+				"properties": {
+					"projectName": {
+						"type": "string"
+					},
+					"repositoryName": {
+						"type": "string"
+					}
+				},
 				"type": "object",
 				"additionalProperties": false
 			}
@@ -352,24 +419,24 @@
 				}
 			}
 		},
-		"/api/bugs/assign/{bugId}": {
+		"/api/bugs/{bugId}": {
 			"patch": {
-				"operationId": "AssignBugToMe",
+				"operationId": "UpdateBug",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/GetResult_any.any.any_"
-										},
-										{
-											"properties": {},
-											"type": "object"
+									"properties": {
+										"message": {
+											"type": "string"
 										}
-									]
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
 								}
 							}
 						}
@@ -392,7 +459,17 @@
 							"type": "string"
 						}
 					}
-				]
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateBugDto"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/projects": {
@@ -450,9 +527,61 @@
 										"allOf": [
 											{
 												"properties": {
+													"projectTeam": {
+														"items": {
+															"allOf": [
+																{
+																	"properties": {
+																		"user": {
+																			"properties": {
+																				"email": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"email"
+																			],
+																			"type": "object"
+																		}
+																	},
+																	"required": [
+																		"user"
+																	],
+																	"type": "object"
+																},
+																{
+																	"$ref": "#/components/schemas/GetResult_any.any.any_"
+																},
+																{
+																	"properties": {},
+																	"type": "object"
+																}
+															]
+														},
+														"type": "array"
+													},
 													"testerTeam": {
 														"items": {
 															"allOf": [
+																{
+																	"properties": {
+																		"user": {
+																			"properties": {
+																				"email": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"email"
+																			],
+																			"type": "object"
+																		}
+																	},
+																	"required": [
+																		"user"
+																	],
+																	"type": "object"
+																},
 																{
 																	"$ref": "#/components/schemas/GetResult_any.any.any_"
 																},
@@ -468,6 +597,75 @@
 														"items": {
 															"allOf": [
 																{
+																	"properties": {
+																		"reporter": {
+																			"allOf": [
+																				{
+																					"properties": {
+																						"user": {
+																							"properties": {
+																								"email": {
+																									"type": "string"
+																								}
+																							},
+																							"required": [
+																								"email"
+																							],
+																							"type": "object"
+																						}
+																					},
+																					"required": [
+																						"user"
+																					],
+																					"type": "object"
+																				},
+																				{
+																					"$ref": "#/components/schemas/GetResult_any.any.any_"
+																				},
+																				{
+																					"properties": {},
+																					"type": "object"
+																				}
+																			]
+																		},
+																		"assignedTo": {
+																			"allOf": [
+																				{
+																					"properties": {
+																						"user": {
+																							"properties": {
+																								"email": {
+																									"type": "string"
+																								}
+																							},
+																							"required": [
+																								"email"
+																							],
+																							"type": "object"
+																						}
+																					},
+																					"required": [
+																						"user"
+																					],
+																					"type": "object"
+																				},
+																				{
+																					"$ref": "#/components/schemas/GetResult_any.any.any_"
+																				},
+																				{
+																					"properties": {},
+																					"type": "object"
+																				}
+																			]
+																		}
+																	},
+																	"required": [
+																		"reporter",
+																		"assignedTo"
+																	],
+																	"type": "object"
+																},
+																{
 																	"$ref": "#/components/schemas/GetResult_any.any.any_"
 																},
 																{
@@ -481,6 +679,25 @@
 													"owner": {
 														"allOf": [
 															{
+																"properties": {
+																	"user": {
+																		"properties": {
+																			"email": {
+																				"type": "string"
+																			}
+																		},
+																		"required": [
+																			"email"
+																		],
+																		"type": "object"
+																	}
+																},
+																"required": [
+																	"user"
+																],
+																"type": "object"
+															},
+															{
 																"$ref": "#/components/schemas/GetResult_any.any.any_"
 															},
 															{
@@ -491,6 +708,7 @@
 													}
 												},
 												"required": [
+													"projectTeam",
 													"testerTeam",
 													"bugs",
 													"owner"
@@ -564,6 +782,59 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/projects/{projectId}": {
+			"patch": {
+				"operationId": "UpdateProject",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Project"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateProjectDto"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/testing/health-check": {

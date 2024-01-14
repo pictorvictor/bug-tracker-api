@@ -12,6 +12,7 @@ import {
 } from '../../utils/interfaces/auth.interface';
 import { authMiddleware } from '../../utils/middlewares/auth.middleware';
 import { ProjectIdDto } from './dtos/project-id.dto';
+import { UpdateProjectDto } from './dtos/update-project.dto';
 
 class ProjectRouter implements Routes {
   public router = Router();
@@ -38,6 +39,13 @@ class ProjectRouter implements Routes {
       roleMiddleware(UserRole.TST),
       validationMiddleware(ProjectIdDto, 'params'),
       this.enrollInProject,
+    );
+    this.router.patch(
+      ROUTES.project.project,
+      roleMiddleware(UserRole.MP),
+      validationMiddleware(ProjectIdDto, 'params'),
+      validationMiddleware(UpdateProjectDto, 'body'),
+      this.updateProject,
     );
   };
 
@@ -81,6 +89,27 @@ class ProjectRouter implements Routes {
       const response = await this.projectController.enrollInProject(
         user,
         projectId,
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+  private updateProject = async (
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const user = req.user as UserInfo;
+      const { projectId } = req.params;
+      const { body } = req;
+      const response = await this.projectController.updateProject(
+        user,
+        projectId,
+        body
       );
       res.status(200).json(response);
     } catch (error) {

@@ -12,8 +12,9 @@ import {
 } from 'tsoa';
 import { ROUTES } from '../../utils/constants';
 import { UserInfo } from '../../utils/interfaces/auth.interface';
-import { getProjectBugs, createBug, assignBugToMe } from './bug.service';
+import { getProjectBugs, createBug, assignBugToMe, updateBug } from './bug.service';
 import { CreateBugReqDto } from './dtos/create-bug.dto';
+import { UpdateBugDto } from './dtos/update-bug.dto';
 
 @Route('api')
 @Tags('Bugs')
@@ -34,9 +35,9 @@ export class BugController extends Controller {
     return createBug(reqUser, projectId, createBugReqDto);
   }
 
-  @Patch(ROUTES.bug.assignBugToMe)
+  @Patch(ROUTES.bug.bug)
   @Security('token')
-  assignBugToMe(@Request() reqUser: UserInfo, @Path() bugId: string) {
-    return assignBugToMe(reqUser, bugId);
+  updateBug(@Request() reqUser: UserInfo, @Path() bugId: string, @Body() body: UpdateBugDto) {
+    return updateBug(reqUser, bugId, body);
   }
 }
