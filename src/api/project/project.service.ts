@@ -128,19 +128,34 @@ const getAllProjects = async (reqUser: UserInfo) => {
 };
 
 const enrollInProject = async (reqUser: UserInfo, projectId: string) => {
-  const { id } = reqUser;
-  await prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      testerTeam: {
-        connect: {
-          id,
+  const { id, role} = reqUser;
+  if (role === 'TST') {
+    await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        testerTeam: {
+          connect: {
+            id,
+          },
         },
       },
-    },
-  });
+    });
+  } else {
+    await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        projectTeam: {
+          connect: {
+            id,
+          },
+        },
+      },
+    });
+  }
 
   return { message: SUCCESS_MESSAGE };
 };

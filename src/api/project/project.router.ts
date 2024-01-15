@@ -36,7 +36,7 @@ class ProjectRouter implements Routes {
     );
     this.router.post(
       ROUTES.project.enrollInProject,
-      roleMiddleware(UserRole.TST),
+      authMiddleware,
       validationMiddleware(ProjectIdDto, 'params'),
       this.enrollInProject,
     );
